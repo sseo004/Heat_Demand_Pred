@@ -10,42 +10,6 @@
 ## 🗂️ 데이터 및 전처리
 
 ### 🔹 1. 데이터 불러오기 및 기본 정제
-- **설명**: Pandas 라이브러리를 사용해 원본 데이터(`train_heat.csv`)를 불러옵니다. `read_csv` 과정에서 자동 생성될 수 있는 `Unnamed: 0` 컬럼을 제거하고, `replace`를 이용해 컬럼명에 포함된 공통 접두어(`train_heat.`)를 제거하여 변수명을 간결하게 만듭니다.
-
-````python
-import pandas as pd
-import numpy as np
-import warnings
-
-warnings.filterwarnings('ignore')
-
-# 1-1. 데이터 불러오기
-df = pd.read_csv('train_heat.csv')
-
-# 1-2. 불필요한 컬럼 제거
-if 'Unnamed: 0' in df.columns:
-    df.drop(columns='Unnamed: 0', inplace=True)
-
-# 1-3. 컬럼명 정리
-df.columns = [col.replace('train_heat.', '') for col in df.columns]
-```
-
-### 알겠습니다. 코드 블록 형식을 요청하신 대로 수정하여 전체 README.md 파일을 다시 제공해 드립니다.
-
-Markdown
-
-# 🔥 날씨 빅데이터를 활용한 열 수요 예측
-
-## 📌 프로젝트 개요
-
-### 🎯 분석 배경
-기후 변화 및 에너지 수요의 변동성이 증가함에 따라, 기상 데이터를 활용한 수요 예측의 중요성이 커지고 있습니다. 본 프로젝트는 시간별·지점별 열수요와 기상 변수의 관계를 학습하고, 단기 예측 모델을 개발하여 효율적인 에너지 관리 정책 수립에 기여하는 데 목적을 둡니다.
-
----
-
-## 🗂️ 데이터 및 전처리
-
-### 🔹 1. 데이터 불러오기 및 기본 정제
 - Pandas 라이브러리를 사용해 원본 데이터(`train_heat.csv`)를 불러옵니다. `read_csv` 과정에서 자동 생성될 수 있는 `Unnamed: 0` 컬럼을 제거하고, `replace`를 이용해 컬럼명에 포함된 공통 접두어(`train_heat.`)를 제거하여 변수명을 간결하게 만듭니다.
 
 ```python
