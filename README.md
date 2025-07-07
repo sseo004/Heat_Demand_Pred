@@ -134,6 +134,12 @@ dump(model, f'models/rf_{branch_id}.joblib')
 
 ---
 
+## 📊 분석 결과 요약
+
+- 최종 검증에서 RMSE(Root Mean Squared Error)는 19.09로 계산됨.  
+- 이는 전체 열수요 분포에 비해 비교적 낮은 오차 수준으로, 실무 적용 가능성을 보여주는 수치로 평가됨.  
+- 기온 기반 이동 평균, 시간-기온 상호작용, 주기 인코딩 등 주요 피처가 예측력 향상에 기여함.
+
 ## 📂 사용 기술 스택
 - Python (Pandas, NumPy, Scikit-learn)
 - 모델: RandomForestRegressor
