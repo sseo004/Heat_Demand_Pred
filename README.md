@@ -30,7 +30,7 @@ if 'Unnamed: 0' in df.columns:
 df.columns = [col.replace('train_heat.', '') for col in df.columns]
 ```
 
-###🔹2. 시간 정보 처리 및 정렬
+### 🔹2. 시간 정보 처리 및 정렬
 - pd.to_datetime 함수를 사용하여 문자열 형태의 tm 컬럼을 datetime 객체로 변환합니다. 이는 시계열 분석의 기반이 되며, 시간 단위의 다양한 연산을 가능하게 합니다. 이후 sort_values를 통해 각 지점(branch_id)별로 시간순으로 데이터를 명확하게 정렬하여 시계열 연산(예: shift, rolling) 시 발생할 수 있는 데이터 순서 오류를 방지합니다.
 
 ```python
@@ -41,7 +41,7 @@ df['tm'] = pd.to_datetime(df['tm'], format='%Y%m%d%H')
 df = df.sort_values(['branch_id', 'tm']).reset_index(drop=True)
 ```
 
-###🔹3. 이상값 및 결측 처리
+### 🔹3. 이상값 및 결측 처리
 - 기상 데이터에서 측정 실패를 의미하는 값인 -99.0을 NumPy의 NaN으로 일괄 변환하여 결측치로 통일합니다. 또한, 타겟 변수인 heat_demand에 결측치가 있는 행은 모델 학습 및 평가에 사용할 수 없으므로 dropna를 이용해 제거합니다. 결측 비율이 50%를 초과하여 정보성이 낮다고 판단되는 si(일사량) 컬럼은 분석에서 제외합니다.
 
 ```python
@@ -55,7 +55,7 @@ df_select = df_nan.drop(columns='si')
 df_select.dropna(subset=['heat_demand'], inplace=True)
 ```
 
-###🔹4. 시간 기반 연속 변수 보간
+### 🔹4. 시간 기반 연속 변수 보간
 - 기온, 풍속 등 시간에 따라 연속적으로 변하는 물리량의 결측치는 interpolate(method='time')을 사용하여 보간합니다. 이 방법은 시간 간격에 비례하여 값을 채우므로, 불규칙한 시간 간격을 가진 데이터에서도 시계열의 흐름을 왜곡하지 않고 자연스럽게 결측을 처리할 수 있습니다. groupby('branch_id')를 통해 지점별로 독립적으로 보간을 수행합니다.
 
 ```python
@@ -71,7 +71,7 @@ df_interp[time_interp_cols] = df_interp.groupby('branch_id')[time_interp_cols].t
 )
 ```
 
-###🔹5. 풍향(wd) 보간을 위한 극좌표 변환
+### 🔹5. 풍향(wd) 보간을 위한 극좌표 변환
 - 풍향은 359°와 0°가 인접한 원형(Circular) 데이터로, 단순 선형 보간 시 경계에서 큰 왜곡이 발생합니다. (예: 350°와 10°의 평균이 180°로 계산되는 문제) 이를 해결하기 위해 각도(degree)를 라디안(radian)으로 변환한 후, sin과 cos 성분으로 분해하여 2차원 평면의 좌표로 변환합니다. 각 성분은 선형성을 가지므로, 이들을 개별적으로 시간 보간한 뒤 원본 wd 컬럼은 제거합니다.
 
 ```python
@@ -118,7 +118,7 @@ df_interp['hm'] = df_interp.apply(fill_hm_branchwise, axis=1)
 
 ## 🤖 모델링 및 예측
 
-###🔹1. 로그 변환
+### 🔹1. 로그 변환
 - 분포가 한쪽으로 치우친(skewed) 변수들은 모델의 예측 성능을 저하시킬 수 있습니다. np.log1p (log(1+x)) 변환을 적용하여 데이터 분포를 정규분포에 가깝게 만들어 모델의 안정성과 성능을 향상시킵니다. 타겟 변수인 heat_demand를 포함하여 ws, rn_hr1 등에 적용합니다.
 
 ```python
@@ -132,7 +132,7 @@ for col in log_cols:
     df_final[col + '_log'] = np.log1p(df_final[col])
 ```
 
-###🔹2. 시계열 파생 변수 생성
+### 🔹2. 시계열 파생 변수 생성
 - 시계열 데이터의 핵심은 과거의 정보가 현재에 영향을 미친다는 점입니다. shift() 함수를 이용해 과거 시점의 열수요 값을 가져와 Lag 변수를 생성하고, rolling().mean()을 이용해 특정 기간 동안의 평균 추세를 나타내는 이동평균(Moving Average) 변수를 생성합니다. 두 변수 모두 groupby('branch_id')를 통해 지점별로 독립적으로 계산됩니다.
 
 ```python
@@ -148,7 +148,7 @@ for ma in [3, 6, 12, 24]:
     )
 ```
 
-###🔹3. 시간 및 주기 변수 생성
+### 🔹3. 시간 및 주기 변수 생성
 - 열 수요는 시간에 따라 뚜렷한 패턴(일별, 계절별, 주중/주말)을 보입니다. dt 접근자를 이용해 시간, 월, 요일, 주말 여부 등 시간 기반 파생 변수를 생성합니다. 또한, 23시와 0시의 연속성을 모델이 이해할 수 있도록 시간(hour) 변수를 sin/cos으로 변환하여 주기성을 인코딩합니다.
 
 ```python
@@ -163,7 +163,7 @@ df_final['hour_sin'] = np.sin(2 * np.pi * df_final['hour'] / 24)
 df_final['hour_cos'] = np.cos(2 * np.pi * df_final['hour'] / 24)
 ```
 
-###🔹4. 도메인 기반 파생 변수 생성
+### 🔹4. 도메인 기반 파생 변수 생성
 - 도메인 지식을 활용하여 모델의 예측력을 높일 수 있는 변수를 추가합니다. 특정 기준 온도(예: 18℃) 이하로 기온이 떨어질 때의 차이를 계산하여 난방 필요도(Heating Degree Days, HDD) 지표를 생성하고, 기온과 시간대의 복합적인 영향을 반영하기 위해 상호작용 변수를 만듭니다.
 
 ```python
@@ -178,7 +178,7 @@ df_final.fillna(method='bfill', inplace=True)
 df_final.fillna(method='ffill', inplace=True)
 ```
 
-###🔹5. 지점별 모델 학습 및 저장
+### 🔹5. 지점별 모델 학습 및 저장
 - 지점마다 다른 수요 패턴을 가질 것을 가정하여, RandomForestRegressor 모델을 지점별로 개별 학습하는 전략을 사용합니다. 각 지점의 데이터로 모델을 학습시킨 후, joblib 라이브러리를 사용해 학습된 모델을 파일로 저장하여 예측 시 재사용할 수 있도록 관리합니다.
 
 ```python
